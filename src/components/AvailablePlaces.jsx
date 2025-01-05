@@ -1,27 +1,42 @@
 import Places from './Places.jsx';
 import {useEffect, useState} from "react";
+import {Error} from "./Error.jsx";
+import {sortPlacesByDistance} from "../loc.js";
 
-
-const places = localStorage.getItem('places');
 export default function AvailablePlaces({onSelectPlace}) {
 
     const [availablePlaces, setAvailablePlaces] = useState([]);
-
+    const [error, setError] = useState(null);
     useEffect(() => {
         async function fetchPlaces() {
 
             try {
                 const response = await fetch('http://localhost:3000/places');
                 const resData = await response.json();
-                setAvailablePlaces(resData.places);
+
+                navigator.geolocation.getCurrentPosition((pos) => {
+                    const sortedPlaces = sortPlacesByDistance(
+                        resData.places,
+                        pos.coords.latitude,
+                        pos.coords.longitude
+                    );
+
+                    setAvailablePlaces(sortedPlaces);
+
+                });
             } catch (error) {
                 console.error(error);
+                setError({message: error.message || "Qate bolyp qaldy"});
             }
         }
 
         fetchPlaces();
 
     }, []);
+
+    if (error) {
+        return <Error title="An error occurred!" message={error.message} />;
+    }
 
 
     return (

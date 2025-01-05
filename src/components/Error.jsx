@@ -1,10 +1,5 @@
 
 
-if (error) {
-    return <ErrorPage title="An error occurred!" message={error.message} />;
-}
-
-
 export const Error = ({title, message, onConfirm}) => {
 
 
