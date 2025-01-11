@@ -1,4 +1,4 @@
-import Places from './Places.jsx';
+import Places from './Places.tsx';
 import {useEffect, useState} from "react";
 import {Error} from "./Error.jsx";
 import {sortPlacesByDistance} from "../loc.js";
@@ -9,9 +9,10 @@ export default function AvailablePlaces({onSelectPlace}) {
 
     const [availablePlaces, setAvailablePlaces] = useState([]);
     const [error, setError] = useState(null);
+    const [isFetching, setFetching] = useState(false);
     useEffect(() => {
         async function fetchPlaces() {
-
+            setFetching(true);
             try {
                 const places = await fetchAvailablePlaces();
 
@@ -29,6 +30,7 @@ export default function AvailablePlaces({onSelectPlace}) {
                 console.error(error);
                 setError({message: error.message || "Qate bolyp qaldy"});
             }
+            setFetching(false);
         }
 
         fetchPlaces();
@@ -44,6 +46,8 @@ export default function AvailablePlaces({onSelectPlace}) {
         <Places
             title="Available Places"
             places={availablePlaces}
+            isLoading={isFetching}
+            loadingText={"Fetching"}
             fallbackText="No places available."
             onSelectPlace={onSelectPlace}
         />

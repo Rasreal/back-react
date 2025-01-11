@@ -1,22 +1,40 @@
-import {useRef, useState, useCallback} from 'react';
+import {useRef, useState, useCallback, useEffect} from 'react';
 
-import Places from './components/Places.jsx';
+import Places from './components/Places.tsx';
 import Modal from './components/Modal.jsx';
 import DeleteConfirmation from './components/DeleteConfirmation.jsx';
 import logoImg from './assets/logo.png';
 import AvailablePlaces from './components/AvailablePlaces.jsx';
-import {updateUserPlaces} from "./http.js";
+import {fetchAvailablePlaces, fetchUserPlaces, updateUserPlaces} from "./http.js";
 import {Error} from "./components/Error.jsx";
 
 function App() {
     const selectedPlace = useRef();
 
     const [userPlaces, setUserPlaces] = useState([]);
-
+    const [isFetching, setFetching] = useState(false);
     const [modalIsOpen, setModalIsOpen] = useState(false);
 
     const [errorUpdPlaces, setErrorUpdPlaces] = useState(null);
 
+
+    useEffect(() => {
+        async function fetchPlaces() {
+            setFetching(true);
+            try{
+                const places = await fetchUserPlaces();
+                setUserPlaces(places);
+            } catch (error) {
+                setErrorUpdPlaces({
+                    message: error.message || "Fetch qate bolyp qaldy",
+                });
+            }
+
+            setFetching(false);
+        }
+
+        fetchPlaces();
+    }, [])
     function handleStartRemovePlace(place) {
         setModalIsOpen(true);
         selectedPlace.current = place;
@@ -100,9 +118,11 @@ function App() {
             </header>
             <main>
                 <Places
-                    title="I'd like to visit ..."
-                    fallbackText="Select the places you would like to visit below."
+                    title="Осындай жерлерді көргім келеді ..."
+                    fallbackText="Барғығыз, көргіңіз келетін жерді таңдаңыз ..."
                     places={userPlaces}
+                    isLoading={isFetching}
+                    loadingText="Fetch-it etip otyr..."
                     onSelectPlace={handleStartRemovePlace}
                 />
 

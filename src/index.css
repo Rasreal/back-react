@@ -222,6 +222,22 @@ header p {
   margin: auto;
 }
 
+.loading-text {
+  font-size: 1.2rem;
+  font-weight: bold;
+  animation: fadeIn 1s infinite;
+}
+
+@keyframes fadeIn {
+  0%, 50%, 100% {
+    opacity: 1;
+  }
+  25%, 75% {
+    opacity: 0.5;
+  }
+}
+
+
 @keyframes slide-down-fade-in {
   from {
     opacity: 0;
