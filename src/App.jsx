@@ -1,40 +1,25 @@
-import {useRef, useState, useCallback, useEffect} from 'react';
+import {useRef, useState, useCallback} from 'react';
 
 import Places from './components/Places.tsx';
 import Modal from './components/Modal.jsx';
 import DeleteConfirmation from './components/DeleteConfirmation.jsx';
 import logoImg from './assets/logo.png';
 import AvailablePlaces from './components/AvailablePlaces.jsx';
-import {fetchAvailablePlaces, fetchUserPlaces, updateUserPlaces} from "./http.js";
+import { fetchUserPlaces, updateUserPlaces} from "./http.js";
 import {Error} from "./components/Error.jsx";
+import {useFetch} from "./hooks/useFetch.js";
 
 function App() {
     const selectedPlace = useRef();
 
-    const [userPlaces, setUserPlaces] = useState([]);
-    const [isFetching, setFetching] = useState(false);
     const [modalIsOpen, setModalIsOpen] = useState(false);
 
     const [errorUpdPlaces, setErrorUpdPlaces] = useState(null);
 
 
-    useEffect(() => {
-        async function fetchPlaces() {
-            setFetching(true);
-            try{
-                const places = await fetchUserPlaces();
-                setUserPlaces(places);
-            } catch (error) {
-                setErrorUpdPlaces({
-                    message: error.message || "Fetch qate bolyp qaldy",
-                });
-            }
+    const {isFetching, fetchedData: userPlaces, error, setFetchedData: setUserPlaces}
+        = useFetch(fetchUserPlaces, []);
 
-            setFetching(false);
-        }
-
-        fetchPlaces();
-    }, [])
     function handleStartRemovePlace(place) {
         setModalIsOpen(true);
         selectedPlace.current = place;
@@ -61,75 +46,66 @@ function App() {
             console.log("success");
         } catch (err) {
             setUserPlaces(userPlaces);
-            setErrorUpdPlaces(
-                {
-                    message: err.message || "Qate bolyp qaldy",
-                }
-            );
+            setErrorUpdPlaces({
+                message: err.message || "Qate bolyp qaldy",
+            });
 
         }
 
     }
 
     const handleRemovePlace = useCallback(async function handleRemovePlace() {
-        setUserPlaces((prevPickedPlaces) =>
-            prevPickedPlaces.filter((place) => place.id !== selectedPlace.current.id)
-        );
+        setUserPlaces((prevPickedPlaces) => prevPickedPlaces.filter((place) => place.id !== selectedPlace.current.id));
 
-        try{
+        try {
             await updateUserPlaces(userPlaces.filter((place) => place.id !== selectedPlace.current.id));
-        } catch(err) {
+        } catch (err) {
             setUserPlaces(userPlaces);
-            setErrorUpdPlaces(
-                {
-                    message: err.message || "Zhoyilmady, qate bolyp qaldy",
-                }
-            );
+            setErrorUpdPlaces({
+                message: err.message || "Zhoyilmady, qate bolyp qaldy",
+            });
         }
 
         setModalIsOpen(false);
-    }, []);
+    }, [userPlaces, setUserPlaces]);
 
 
     function handleError() {
         setErrorUpdPlaces(null);
     }
 
-    return (
-        <>
-            <Modal open={errorUpdPlaces} onClose={handleError}>
-                {errorUpdPlaces &&
-                    <Error title="Qate shyqty" message={errorUpdPlaces.message} onClose={handleError}/>}
-            </Modal>
-            <Modal open={modalIsOpen} onClose={handleStopRemovePlace}>
-                <DeleteConfirmation
-                    onCancel={handleStopRemovePlace}
-                    onConfirm={handleRemovePlace}
-                />
-            </Modal>
+    return (<>
+        <Modal open={errorUpdPlaces} onClose={handleError}>
+            {errorUpdPlaces && <Error title="Qate shyqty" message={errorUpdPlaces.message} onClose={handleError}/>}
+        </Modal>
+        <Modal open={modalIsOpen} onClose={handleStopRemovePlace}>
+            <DeleteConfirmation
+                onCancel={handleStopRemovePlace}
+                onConfirm={handleRemovePlace}
+            />
+        </Modal>
 
-            <header>
-                <img src={logoImg} alt="Stylized globe"/>
-                <h1>PlacePicker</h1>
-                <p>
-                    Create your personal collection of places you would like to visit or
-                    you have visited.
-                </p>
-            </header>
-            <main>
-                <Places
-                    title="Осындай жерлерді көргім келеді ..."
-                    fallbackText="Барғығыз, көргіңіз келетін жерді таңдаңыз ..."
-                    places={userPlaces}
-                    isLoading={isFetching}
-                    loadingText="Fetch-it etip otyr..."
-                    onSelectPlace={handleStartRemovePlace}
-                />
+        <header>
+            <img src={logoImg} alt="Stylized globe"/>
+            <h1>PlacePicker</h1>
+            <p>
+                Create your personal collection of places you would like to visit or
+                you have visited.
+            </p>
+        </header>
+        <main>
+            <Places
+                title="Осындай жерлерді көргім келеді ..."
+                fallbackText="Барғығыз, көргіңіз келетін жерді таңдаңыз ..."
+                places={userPlaces}
+                isLoading={isFetching}
+                loadingText="Fetch-it etip otyr..."
+                onSelectPlace={handleStartRemovePlace}
+            />
 
-                <AvailablePlaces onSelectPlace={handleSelectPlace}/>
-            </main>
-        </>
-    );
+            <AvailablePlaces onSelectPlace={handleSelectPlace}/>
+        </main>
+    </>);
 }
 
 export default App;
