@@ -19,7 +19,7 @@ interface PlacesProps {
     loadingText?: string;
 }
 
-const Places: React.FC<PlacesProps> = ({ title, places, fallbackText, onSelectPlace, isLoading, loadingText }) => {
+const Places: React.FC<PlacesProps> = ({ title, places = [], fallbackText, onSelectPlace, isLoading, loadingText }) => {
     console.log(places);
 
     return (

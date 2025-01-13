@@ -13,6 +13,9 @@ export function useFetch(fetchFunc, initialValue ) {
             try {
                 const places = await fetchFunc();
                 setFetchedData(places);
+
+                console.log('Available places:', places);
+
             } catch (error) {
                 setError({
                     message: error.message || "Fetch qate bolyp qaldy",
@@ -23,7 +26,12 @@ export function useFetch(fetchFunc, initialValue ) {
         }
 
         fetchData();
+
+
     }, [fetchFunc]);
+
+
+
 
     return {
         isFetching,

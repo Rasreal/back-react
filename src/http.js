@@ -6,6 +6,9 @@ export async function fetchAvailablePlaces() {
     if(!response.ok){
         throw new Error(`Could not fetch available places`);
     }
+
+    console.log('Fetched data from API:', resData.places);
+
     return resData.places;
 
 }
